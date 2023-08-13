@@ -1,13 +1,18 @@
 package handler
 
-import "todo_list/internal/service"
+import (
+	"github.com/gin-gonic/gin"
+	"todo_list/internal/service"
+)
 
 type Handler struct {
-	svc *service.Service
+	svc    *service.Service
+	router *gin.Engine
 }
 
 func NewHandler(svc *service.Service) *Handler {
 	return &Handler{
-		svc: svc,
+		svc:    svc,
+		router: gin.New(),
 	}
 }
