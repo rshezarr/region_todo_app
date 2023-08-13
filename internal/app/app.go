@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"todo_list/internal/config"
 	"todo_list/internal/server"
+	"todo_list/pkg/database/mongodb"
 )
 
 func Run() {
@@ -15,6 +16,11 @@ func Run() {
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
+
+	_, err := mongodb.ConnectDB(context.Background())
+	if err != nil {
+		log.Fatalf("error while connecting database: %v", err)
+	}
 
 	srv := server.NewServer(context.Background(), cfg)
 
