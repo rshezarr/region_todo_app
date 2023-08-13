@@ -16,3 +16,7 @@ func NewHandler(svc *service.Service) *Handler {
 		router: gin.New(),
 	}
 }
+
+func (h *Handler) InitRoutes() *gin.Engine {
+	return h.router
+}
