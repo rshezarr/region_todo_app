@@ -1,8 +1,8 @@
 package config
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
-	"log"
 	"time"
 )
 
@@ -16,14 +16,13 @@ type API struct {
 	Timeout        time.Duration `yaml:"timeout"`
 }
 
-func NewConfig() *Config {
+func NewConfig() (*Config, error) {
 	var cfg *Config
 
 	//unmarshal config into "config" struct
 	if err := viper.Unmarshal(&cfg); err != nil {
-		log.Fatalf("error while parsing configs: %v", err)
-		// return nil
+		return nil, fmt.Errorf("error while parsing configs: %w", err)
 	}
 
-	return cfg
+	return cfg, nil
 }
