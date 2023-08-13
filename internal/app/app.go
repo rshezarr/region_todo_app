@@ -7,22 +7,29 @@ import (
 	"os/signal"
 	"syscall"
 	"todo_list/internal/config"
+	"todo_list/internal/handler"
+	"todo_list/internal/repository"
 	"todo_list/internal/server"
+	"todo_list/internal/service"
 	"todo_list/pkg/database/mongodb"
 )
 
 func Run() {
-	cfg := config.NewConfig()
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	cfg, err := config.NewConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	_, err := mongodb.ConnectDB(context.Background())
+	db, err := mongodb.ConnectDB(context.Background())
 	if err != nil {
 		log.Fatalf("error while connecting database: %v", err)
 	}
 
-	srv := server.NewServer(context.Background(), cfg)
+	repo := repository.NewRepository(db)
+	svc := service.NewService(repo)
+	hdr := handler.NewHandler(svc)
+
+	srv := server.NewServer(context.Background(), cfg, hdr.InitRoutes())
 
 	// graceful shutdown
 	// creating channel for signals
