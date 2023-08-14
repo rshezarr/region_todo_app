@@ -6,10 +6,10 @@ import (
 )
 
 type TodoList interface {
-	CreateList(list model.List) (int, error)
-	GetList(id int) (model.List, error)
-	DeleteList(id int) error
-	UpdateList(id int, newList model.List) error
+	Create(list model.List) (int, error)
+	Get(id int) (model.List, error)
+	Delete(id int) error
+	Update(id int, newList model.List) error
 }
 
 type TodoListRepo struct {
@@ -22,22 +22,22 @@ func NewTodoListRepo(db *mongo.Database) TodoList {
 	}
 }
 
-func (t TodoListRepo) CreateList(list model.List) (int, error) {
+func (t TodoListRepo) Create(list model.List) (int, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t TodoListRepo) GetList(id int) (model.List, error) {
+func (t TodoListRepo) Get(id int) (model.List, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t TodoListRepo) DeleteList(id int) error {
+func (t TodoListRepo) Delete(id int) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t TodoListRepo) UpdateList(id int, newList model.List) error {
+func (t TodoListRepo) Update(id int, newList model.List) error {
 	//TODO implement me
 	panic("implement me")
 }
