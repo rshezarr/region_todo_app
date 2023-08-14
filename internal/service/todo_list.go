@@ -14,18 +14,21 @@ type TodoList interface {
 }
 
 type TodoListService struct {
-	repo *repository.TodoListRepo
+	repo repository.TodoList
 }
 
-func NewTodoListService(repo *repository.TodoListRepo) TodoList {
+func NewTodoListService(repo repository.TodoList) TodoList {
 	return &TodoListService{
 		repo: repo,
 	}
 }
 
 func (t TodoListService) CreateList(ctx context.Context, list model.List) (int, error) {
-	//TODO implement me
-	panic("implement me")
+	id, err := t.repo.Create(ctx, list)
+	if err != nil {
+
+	}
+	return id, nil
 }
 
 func (t TodoListService) GetList(ctx context.Context, status string) (model.List, error) {
