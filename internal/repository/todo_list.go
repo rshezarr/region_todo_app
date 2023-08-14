@@ -1,43 +1,50 @@
 package repository
 
 import (
+	"context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"todo_list/internal/model"
 )
 
 type TodoList interface {
-	Create(list model.List) (int, error)
-	Get(id int) (model.List, error)
-	Delete(id int) error
-	Update(id int, newList model.List) error
+	Create(ctx context.Context, list model.List) (int, error)
+	Get(ctx context.Context, id int) (model.List, error)
+	Delete(ctx context.Context, id int) error
+	Update(ctx context.Context, id int, newList model.List) error
 }
 
 type TodoListRepo struct {
-	db *mongo.Database
+	db *mongo.Collection
 }
 
-func NewTodoListRepo(db *mongo.Database) TodoList {
+func NewTodoListRepo(db *mongo.Collection) TodoList {
 	return &TodoListRepo{
 		db: db,
 	}
 }
 
-func (t TodoListRepo) Create(list model.List) (int, error) {
+func (t TodoListRepo) Create(ctx context.Context, list model.List) (int, error) {
+	result, err := t.db.InsertOne(ctx, list)
+	if err != nil {
+		return 0, err
+	}
+
+	id := result.InsertedID.(int)
+
+	return id, nil
+}
+
+func (t TodoListRepo) Get(ctx context.Context, id int) (model.List, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t TodoListRepo) Get(id int) (model.List, error) {
+func (t TodoListRepo) Delete(ctx context.Context, id int) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t TodoListRepo) Delete(id int) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t TodoListRepo) Update(id int, newList model.List) error {
+func (t TodoListRepo) Update(ctx context.Context, id int, newList model.List) error {
 	//TODO implement me
 	panic("implement me")
 }
