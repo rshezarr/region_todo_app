@@ -40,7 +40,7 @@ func Run() {
 
 	// run server in goroutine
 	go func() {
-		log.Printf("app: Starting server at port %v -> http:// localhost%v\n", cfg.API.Port, cfg.API.Port)
+		log.Printf("app: Starting server at port %v -> http://localhost%v\n", cfg.API.Port, cfg.API.Port)
 		srv.Start()
 	}()
 
