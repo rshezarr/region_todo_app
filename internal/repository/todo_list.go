@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"errors"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"todo_list/internal/model"
 )
@@ -35,8 +37,19 @@ func (t TodoListRepo) Create(ctx context.Context, list model.List) (int, error) 
 }
 
 func (t TodoListRepo) Get(ctx context.Context, id int) (model.List, error) {
-	//TODO implement me
-	panic("implement me")
+	filter := bson.M{"id": id}
+
+	list := model.List{}
+
+	if err := t.db.FindOne(ctx, filter).Decode(&list); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return model.List{}, errors.New("list not found")
+		}
+
+		return model.List{}, err
+	}
+
+	return list, nil
 }
 
 func (t TodoListRepo) Delete(ctx context.Context, id int) error {
