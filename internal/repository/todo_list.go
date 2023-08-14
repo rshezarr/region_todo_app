@@ -11,7 +11,7 @@ import (
 
 type TodoList interface {
 	Create(ctx context.Context, list model.List) (int, error)
-	Get(ctx context.Context, status string) (model.List, error)
+	Get(ctx context.Context, status string) ([]model.List, error)
 	Delete(ctx context.Context, id int) error
 	Update(ctx context.Context, id int, newList model.List) (int, error)
 }
@@ -38,24 +38,24 @@ func (t *TodoListRepo) Create(ctx context.Context, list model.List) (int, error)
 	return id, nil
 }
 
-func (t *TodoListRepo) Get(ctx context.Context, status string) (model.List, error) {
+func (t *TodoListRepo) Get(ctx context.Context, status string) ([]model.List, error) {
 	filter := bson.M{
 		"activeAt": bson.M{"$lte": time.Now()},
 	}
 
-	list := model.List{}
+	list := []model.List{}
 
 	cur, err := t.db.Find(ctx, filter)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return model.List{}, errors.New("list not found")
+			return []model.List{}, errors.New("list not found")
 		}
 
-		return model.List{}, err
+		return []model.List{}, err
 	}
 
 	if err := cur.Decode(&list); err != nil {
-		return model.List{}, err
+		return []model.List{}, err
 	}
 
 	return list, nil
