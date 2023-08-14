@@ -18,5 +18,13 @@ func NewHandler(svc *service.Service) *Handler {
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
+	todoList := h.router.Group("/api/todo-list")
+	{
+		todoList.POST("/tasks", nil)
+		todoList.GET("/tasks:status", nil)
+		todoList.PUT("/tasks/:id", nil)
+		todoList.DELETE("/tasks/:id", nil)
+	}
+
 	return h.router
 }
