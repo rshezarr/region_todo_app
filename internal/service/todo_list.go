@@ -8,7 +8,7 @@ import (
 
 type TodoList interface {
 	CreateList(ctx context.Context, list model.List) (int, error)
-	GetList(ctx context.Context, status string) (model.List, error)
+	GetList(ctx context.Context, status string) ([]model.List, error)
 	UpdateList(ctx context.Context, newList model.List) (int, error)
 	DeleteList(ctx context.Context, id int) error
 }
@@ -31,10 +31,10 @@ func (t TodoListService) CreateList(ctx context.Context, list model.List) (int, 
 	return id, nil
 }
 
-func (t TodoListService) GetList(ctx context.Context, status string) (model.List, error) {
+func (t TodoListService) GetList(ctx context.Context, status string) ([]model.List, error) {
 	list, err := t.repo.Get(ctx, status)
 	if err != nil {
-		return model.List{}, err
+		return []model.List{}, err
 	}
 
 	return list, nil
