@@ -21,6 +21,7 @@ type TodoListRepo struct {
 }
 
 func NewTodoListRepo(db *mongo.Database) TodoList {
+	db.CreateCollection(context.Background(), "lists")
 	return &TodoListRepo{
 		db: db.Collection("lists"),
 	}
