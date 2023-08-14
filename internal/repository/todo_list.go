@@ -61,8 +61,12 @@ func (t TodoListRepo) Get(ctx context.Context, status string) (model.List, error
 }
 
 func (t TodoListRepo) Delete(ctx context.Context, id int) error {
-	//TODO implement me
-	panic("implement me")
+	_, err := t.db.DeleteOne(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (t TodoListRepo) Update(ctx context.Context, id int, newList model.List) error {
