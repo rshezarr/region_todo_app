@@ -20,10 +20,10 @@ func NewHandler(svc *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	todoList := h.router.Group("/api/todo-list")
 	{
-		todoList.POST("/tasks", nil)
-		todoList.GET("/tasks:status", nil)
-		todoList.PUT("/tasks/:id", nil)
-		todoList.DELETE("/tasks/:id", nil)
+		todoList.POST("/tasks", h.CreateListHandler)
+		todoList.GET("/tasks", h.GetListsHandler)
+		todoList.PUT("/tasks/:id", h.UpdateListHandler)
+		todoList.DELETE("/tasks/:id", h.DeleteListHandler)
 	}
 
 	return h.router
