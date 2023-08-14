@@ -5,12 +5,13 @@ import (
 	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 	"todo_list/internal/model"
 )
 
 type TodoList interface {
 	Create(ctx context.Context, list model.List) (int, error)
-	Get(ctx context.Context, id int) (model.List, error)
+	Get(ctx context.Context, status string) (model.List, error)
 	Delete(ctx context.Context, id int) error
 	Update(ctx context.Context, id int, newList model.List) error
 }
@@ -19,9 +20,9 @@ type TodoListRepo struct {
 	db *mongo.Collection
 }
 
-func NewTodoListRepo(db *mongo.Collection) TodoList {
+func NewTodoListRepo(db *mongo.Database) TodoList {
 	return &TodoListRepo{
-		db: db,
+		db: db.Collection("lists"),
 	}
 }
 
@@ -36,16 +37,23 @@ func (t TodoListRepo) Create(ctx context.Context, list model.List) (int, error) 
 	return id, nil
 }
 
-func (t TodoListRepo) Get(ctx context.Context, id int) (model.List, error) {
-	filter := bson.M{"id": id}
+func (t TodoListRepo) Get(ctx context.Context, status string) (model.List, error) {
+	filter := bson.M{
+		"activeAt": bson.M{"$lte": time.Now()},
+	}
 
 	list := model.List{}
 
-	if err := t.db.FindOne(ctx, filter).Decode(&list); err != nil {
+	cur, err := t.db.Find(ctx, filter)
+	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return model.List{}, errors.New("list not found")
 		}
 
+		return model.List{}, err
+	}
+
+	if err := cur.Decode(&list); err != nil {
 		return model.List{}, err
 	}
 
