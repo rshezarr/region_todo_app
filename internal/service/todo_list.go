@@ -50,6 +50,5 @@ func (t TodoListService) UpdateList(ctx context.Context, newList model.List) (in
 }
 
 func (t TodoListService) DeleteList(ctx context.Context, id int) error {
-	//TODO implement me
-	panic("implement me")
+	return t.repo.Delete(ctx, id)
 }
