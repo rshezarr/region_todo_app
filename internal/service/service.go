@@ -5,8 +5,11 @@ import (
 )
 
 type Service struct {
+	TodoList TodoList
 }
 
 func NewService(repo *repository.Repository) *Service {
-	return &Service{}
+	return &Service{
+		TodoList: NewTodoListService(repo.TodoList),
+	}
 }
