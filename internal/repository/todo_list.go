@@ -26,7 +26,7 @@ func NewTodoListRepo(db *mongo.Database) TodoList {
 	}
 }
 
-func (t TodoListRepo) Create(ctx context.Context, list model.List) (int, error) {
+func (t *TodoListRepo) Create(ctx context.Context, list model.List) (int, error) {
 	result, err := t.db.InsertOne(ctx, list)
 	if err != nil {
 		return 0, err
@@ -37,7 +37,7 @@ func (t TodoListRepo) Create(ctx context.Context, list model.List) (int, error) 
 	return id, nil
 }
 
-func (t TodoListRepo) Get(ctx context.Context, status string) (model.List, error) {
+func (t *TodoListRepo) Get(ctx context.Context, status string) (model.List, error) {
 	filter := bson.M{
 		"activeAt": bson.M{"$lte": time.Now()},
 	}
@@ -60,7 +60,7 @@ func (t TodoListRepo) Get(ctx context.Context, status string) (model.List, error
 	return list, nil
 }
 
-func (t TodoListRepo) Delete(ctx context.Context, id int) error {
+func (t *TodoListRepo) Delete(ctx context.Context, id int) error {
 	_, err := t.db.DeleteOne(ctx, id)
 	if err != nil {
 		return err
@@ -69,7 +69,13 @@ func (t TodoListRepo) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-func (t TodoListRepo) Update(ctx context.Context, id int, newList model.List) error {
-	//TODO implement me
-	panic("implement me")
+func (t *TodoListRepo) Update(ctx context.Context, id int, newList model.List) (int, error) {
+	result, err := t.db.UpdateByID(ctx, id, newList)
+	if err != nil {
+		return 0, err
+	}
+
+	resId := result.UpsertedID.(int)
+
+	return resId, nil
 }
