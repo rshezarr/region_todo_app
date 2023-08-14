@@ -13,7 +13,7 @@ type TodoList interface {
 	Create(ctx context.Context, list model.List) (int, error)
 	Get(ctx context.Context, status string) (model.List, error)
 	Delete(ctx context.Context, id int) error
-	Update(ctx context.Context, id int, newList model.List) error
+	Update(ctx context.Context, id int, newList model.List) (int, error)
 }
 
 type TodoListRepo struct {
