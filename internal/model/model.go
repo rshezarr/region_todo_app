@@ -1,9 +1,7 @@
 package model
 
-import "time"
-
 type List struct {
-	ID       int
+	ID       string
 	Title    string
-	ActiveAt time.Time
+	ActiveAt string
 }
