@@ -7,10 +7,10 @@ import (
 )
 
 type TodoList interface {
-	CreateList(ctx context.Context, list model.List) (int, error)
+	CreateList(ctx context.Context, list model.List) (string, error)
 	GetList(ctx context.Context, status string) ([]model.List, error)
-	UpdateList(ctx context.Context, newList model.List) (int, error)
-	DeleteList(ctx context.Context, id int) error
+	UpdateList(ctx context.Context, newList model.List) (string, error)
+	DeleteList(ctx context.Context, id string) error
 }
 
 type TodoListService struct {
@@ -23,10 +23,10 @@ func NewTodoListService(repo repository.TodoList) TodoList {
 	}
 }
 
-func (t TodoListService) CreateList(ctx context.Context, list model.List) (int, error) {
+func (t TodoListService) CreateList(ctx context.Context, list model.List) (string, error) {
 	id, err := t.repo.Create(ctx, list)
 	if err != nil {
-
+		return "", err
 	}
 	return id, nil
 }
@@ -40,15 +40,15 @@ func (t TodoListService) GetList(ctx context.Context, status string) ([]model.Li
 	return list, nil
 }
 
-func (t TodoListService) UpdateList(ctx context.Context, newList model.List) (int, error) {
+func (t TodoListService) UpdateList(ctx context.Context, newList model.List) (string, error) {
 	id, err := t.repo.Update(ctx, newList.ID, newList)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	return id, nil
 }
 
-func (t TodoListService) DeleteList(ctx context.Context, id int) error {
+func (t TodoListService) DeleteList(ctx context.Context, id string) error {
 	return t.repo.Delete(ctx, id)
 }
