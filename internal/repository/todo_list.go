@@ -2,18 +2,18 @@ package repository
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 	"todo_list/internal/model"
 )
 
 type TodoList interface {
-	Create(ctx context.Context, list model.List) (int, error)
+	Create(ctx context.Context, list model.List) (string, error)
 	Get(ctx context.Context, status string) ([]model.List, error)
-	Delete(ctx context.Context, id int) error
-	Update(ctx context.Context, id int, newList model.List) (int, error)
+	Delete(ctx context.Context, id string) error
+	Update(ctx context.Context, id string, newList model.List) (string, error)
 }
 
 type TodoListRepo struct {
@@ -27,41 +27,47 @@ func NewTodoListRepo(db *mongo.Database) TodoList {
 	}
 }
 
-func (t *TodoListRepo) Create(ctx context.Context, list model.List) (int, error) {
+func (t *TodoListRepo) Create(ctx context.Context, list model.List) (string, error) {
 	result, err := t.db.InsertOne(ctx, list)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	id := result.InsertedID.(int)
+	objectIDValue, ok := result.InsertedID.(primitive.ObjectID)
+	if !ok {
+		fmt.Println("Interface does not hold a primitive.ObjectID value")
+		return "", err
+	}
+
+	id := objectIDValue.String()
 
 	return id, nil
 }
 
 func (t *TodoListRepo) Get(ctx context.Context, status string) ([]model.List, error) {
 	filter := bson.M{
-		"activeAt": bson.M{"$lte": time.Now()},
+		"title": "Купить книгу 2",
 	}
 
-	list := []model.List{}
+	var list []model.List
 
 	cur, err := t.db.Find(ctx, filter)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return []model.List{}, errors.New("list not found")
-		}
-
-		return []model.List{}, err
+		return nil, err
 	}
 
-	if err := cur.Decode(&list); err != nil {
-		return []model.List{}, err
+	for cur.Next(ctx) {
+		var l model.List
+		if err := cur.Decode(&l); err != nil {
+			return nil, err
+		}
+		list = append(list, l)
 	}
 
 	return list, nil
 }
 
-func (t *TodoListRepo) Delete(ctx context.Context, id int) error {
+func (t *TodoListRepo) Delete(ctx context.Context, id string) error {
 	_, err := t.db.DeleteOne(ctx, id)
 	if err != nil {
 		return err
@@ -70,13 +76,19 @@ func (t *TodoListRepo) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-func (t *TodoListRepo) Update(ctx context.Context, id int, newList model.List) (int, error) {
+func (t *TodoListRepo) Update(ctx context.Context, id string, newList model.List) (string, error) {
 	result, err := t.db.UpdateByID(ctx, id, newList)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	resId := result.UpsertedID.(int)
+	objectIDValue, ok := result.UpsertedID.(primitive.ObjectID)
+	if !ok {
+		fmt.Println("Interface does not hold a primitive.ObjectID value")
+		return "", err
+	}
+
+	resId := objectIDValue.String()
 
 	return resId, nil
 }
