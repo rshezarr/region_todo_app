@@ -17,7 +17,7 @@ import (
 func Run() {
 	cfg, err := config.NewConfig()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("error while parsing config %v\n", err)
 	}
 
 	db, err := mongodb.ConnectDB(context.Background())
