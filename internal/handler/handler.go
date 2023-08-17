@@ -22,7 +22,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		todoList.POST("/tasks", h.CreateListHandler)
 		todoList.GET("/tasks", h.GetListsHandler)
-		todoList.PUT("/tasks/:id/done", h.UpdateListHandler)
+		todoList.PUT("/tasks/:id", h.UpdateListHandler)
+		todoList.PUT("/tasks/:id/done", h.UpdateListStatusHandler)
 		todoList.DELETE("/tasks/:id", h.DeleteListHandler)
 	}
 
