@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 	"todo_list/internal/model"
 )
 
@@ -13,7 +15,8 @@ type TodoList interface {
 	Create(ctx context.Context, list model.List) (string, error)
 	Get(ctx context.Context, status string) ([]model.List, error)
 	Delete(ctx context.Context, id string) error
-	Update(ctx context.Context, id string, newList model.List) (string, error)
+	Update(ctx context.Context, id string, newList model.List) error
+	UpdateStatus(ctx context.Context, id string) error
 }
 
 type TodoListRepo struct {
@@ -21,7 +24,7 @@ type TodoListRepo struct {
 }
 
 func NewTodoListRepo(db *mongo.Database) TodoList {
-	db.CreateCollection(context.Background(), "lists")
+
 	return &TodoListRepo{
 		db: db.Collection("lists"),
 	}
@@ -39,14 +42,17 @@ func (t *TodoListRepo) Create(ctx context.Context, list model.List) (string, err
 		return "", err
 	}
 
-	id := objectIDValue.String()
+	id := objectIDValue.Hex()
 
 	return id, nil
 }
 
 func (t *TodoListRepo) Get(ctx context.Context, status string) ([]model.List, error) {
-	filter := bson.M{
-		"title": "Купить книгу 2",
+	filter := bson.M{}
+	if status == "active" {
+		filter = bson.M{
+			"activeat": bson.M{"$lte": time.Now()},
+		}
 	}
 
 	var list []model.List
@@ -68,7 +74,14 @@ func (t *TodoListRepo) Get(ctx context.Context, status string) ([]model.List, er
 }
 
 func (t *TodoListRepo) Delete(ctx context.Context, id string) error {
-	_, err := t.db.DeleteOne(ctx, id)
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("error converting ID: %w", err)
+	}
+
+	filter := bson.M{"_id": objectID}
+
+	_, err = t.db.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}
@@ -76,19 +89,38 @@ func (t *TodoListRepo) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (t *TodoListRepo) Update(ctx context.Context, id string, newList model.List) (string, error) {
-	result, err := t.db.UpdateByID(ctx, id, newList)
+func (t *TodoListRepo) Update(ctx context.Context, id string, newList model.List) error {
+	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return "", err
+		return fmt.Errorf("error converting ID: %w", err)
 	}
 
-	objectIDValue, ok := result.UpsertedID.(primitive.ObjectID)
-	if !ok {
-		fmt.Println("Interface does not hold a primitive.ObjectID value")
-		return "", err
+	update := bson.M{"$set": bson.M{"title": newList.Title, "activeat": newList.ActiveAt}}
+
+	res, err := t.db.UpdateByID(ctx, objectID, update)
+	if err != nil {
+		return fmt.Errorf("repo: error while updating: %w", err)
+	} else if res.MatchedCount != 1 {
+		return errors.New("no matched document found for update")
 	}
 
-	resId := objectIDValue.String()
+	return nil
+}
 
-	return resId, nil
+func (t *TodoListRepo) UpdateStatus(ctx context.Context, id string) error {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("error converting ID: %w", err)
+	}
+
+	update := bson.M{"$set": bson.M{"status": "done"}}
+
+	res, err := t.db.UpdateByID(ctx, objectID, update)
+	if err != nil {
+		return fmt.Errorf("repo: error while updating: %w", err)
+	} else if res.MatchedCount != 1 {
+		return errors.New("no matched document found for update")
+	}
+
+	return nil
 }
