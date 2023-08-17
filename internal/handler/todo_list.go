@@ -2,31 +2,25 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
-	"todo_list/internal/model"
+	"todo_list/internal/dto"
 )
 
 func (h *Handler) CreateListHandler(c *gin.Context) {
-	var list model.List
+	list := dto.List{}
 
 	if err := c.BindJSON(&list); err != nil {
-		c.Error(err)
-		log.Printf("error while bind json: %v", err)
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	id, err := h.svc.TodoList.CreateList(c.Copy(), list)
+	_, err := h.svc.TodoList.CreateList(c.Copy(), list)
 	if err != nil {
-		c.Error(err)
-		log.Printf("error while creating list: %v", err)
+		newErrorResponse(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	_, err = c.Writer.WriteString(id)
-	if err != nil {
-		c.Error(err)
-	}
+	c.Status(http.StatusNoContent)
 }
 
 func (h *Handler) GetListsHandler(c *gin.Context) {
@@ -34,7 +28,7 @@ func (h *Handler) GetListsHandler(c *gin.Context) {
 
 	lists, err := h.svc.TodoList.GetList(c.Copy(), status)
 	if err != nil {
-		c.Error(err)
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -44,35 +38,43 @@ func (h *Handler) GetListsHandler(c *gin.Context) {
 }
 
 func (h *Handler) UpdateListHandler(c *gin.Context) {
-	id := c.GetString("id")
+	paramId := c.Param("id")
 
-	newList := model.List{
-		ID: id,
-	}
+	newList := dto.List{}
 
 	if err := c.BindJSON(&newList); err != nil {
-		c.Error(err)
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	id, err := h.svc.TodoList.UpdateList(c.Copy(), newList)
+	err := h.svc.TodoList.UpdateList(c.Copy(), paramId, newList)
 	if err != nil {
-		c.Error(err)
+		newErrorResponse(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusNoContent, map[string]interface{}{
-		"updated_list_id": id,
-	})
+	c.Status(http.StatusNoContent)
+}
+
+func (h *Handler) UpdateListStatusHandler(c *gin.Context) {
+	paramId := c.Param("id")
+
+	err := h.svc.TodoList.UpdateStatus(c.Copy(), paramId)
+	if err != nil {
+		newErrorResponse(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 func (h *Handler) DeleteListHandler(c *gin.Context) {
-	id := c.GetString("id")
+	id := c.Param("id")
 
 	if err := h.svc.TodoList.DeleteList(c.Copy(), id); err != nil {
-		c.Error(err)
+		newErrorResponse(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusNoContent, nil)
+	c.Status(http.StatusNoContent)
 }
