@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo
+    container_name: lists_db
+    restart: always
+    ports:
+      - "27017:27017"
+  api:
+    container_name: todo_app
+    restart: on-failure
+    build: .
+    ports:
+      - "9090:9090"
