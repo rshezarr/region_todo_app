@@ -7,7 +7,7 @@ import (
 )
 
 func ConnectDB(ctx context.Context) (*mongo.Database, error) {
-	cliOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	cliOptions := options.Client().ApplyURI("mongodb://lists_db:27017")
 
 	client, err := mongo.Connect(ctx, cliOptions)
 	if err != nil {
