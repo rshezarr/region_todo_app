@@ -1,0 +1,171 @@
+basePath: /v1
+definitions:
+  dto.List:
+    properties:
+      active_at:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  handler.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:9090
+info:
+  contact: {}
+  description: API for managing todo lists.
+  title: Todo App API
+  version: "1.0"
+paths:
+  /api/todo-list/tasks:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve lists based on the provided status
+      parameters:
+      - description: Status of lists (optional)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.List'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Get lists
+      tags:
+      - Lists
+    post:
+      consumes:
+      - application/json
+      description: Create a new list with the provided data
+      parameters:
+      - description: List data
+        in: body
+        name: list
+        required: true
+        schema:
+          $ref: '#/definitions/dto.List'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Create a new list
+      tags:
+      - Lists
+  /api/todo-list/tasks/{id}:
+    delete:
+      description: Delete an existing list by ID
+      parameters:
+      - description: ID of the list
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Delete a list
+      tags:
+      - Lists
+    put:
+      consumes:
+      - application/json
+      description: Update an existing list with new data
+      parameters:
+      - description: ID of the list
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated list data
+        in: body
+        name: list
+        required: true
+        schema:
+          $ref: '#/definitions/dto.List'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Update a list
+      tags:
+      - Lists
+  /api/todo-list/tasks/{id}/done:
+    put:
+      description: Update the status of an existing list
+      parameters:
+      - description: ID of the list
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Update list status
+      tags:
+      - Lists
+schemes:
+- https
+swagger: "2.0"
