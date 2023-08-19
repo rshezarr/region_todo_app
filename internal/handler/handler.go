@@ -2,6 +2,10 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "todo_list/docs"
 	"todo_list/internal/service"
 )
 
@@ -18,6 +22,8 @@ func NewHandler(svc *service.Service) *Handler {
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
+	h.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	todoList := h.router.Group("/api/todo-list")
 	{
 		todoList.POST("/tasks", h.CreateListHandler)
