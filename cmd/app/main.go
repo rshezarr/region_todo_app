@@ -7,6 +7,16 @@ import (
 	"todo_list/internal/app"
 )
 
+// @title Todo App API
+// @description API for managing todo lists.
+// @version 1.0
+// @host localhost:9090
+// @BasePath /v1
+// @schemes http
+// @schemes https
+// @produces json
+// @consumes json
+
 func main() {
 	if err := initConfig(); err != nil {
 		log.Fatalf("error occured while parsing configs: %v", err)
